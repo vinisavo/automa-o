@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Home</title>
+<style>
+:root {
+    --fundo: #101820;
+    --painel: #1c2733;
+    --painel-2: #243342;
+    --texto: #edf4f8;
+    --texto-suave: #aebbc8;
+    --verde: #43e0b1;
+    --vermelho: #ff6877;
+    --borda: #354454;
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--fundo);
+    color: var(--texto);
+    font-family: Arial, Helvetica, sans-serif;
+}
+header {
+    padding: 22px 18px;
+    border-bottom: 1px solid var(--borda);
+    background: #131e28;
+}
+.cabecalho {
+    width: min(900px, 100%);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.logo {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: var(--verde);
+    color: #101820;
+    font-size: 22px;
+    font-weight: 800;
+}
+header h1 { margin: 0; font-size: 22px; }
+header p { margin: 4px 0 0; color: var(--texto-suave); font-size: 13px; }
+main { width: min(900px, calc(100% - 28px)); margin: 24px auto 48px; }
+h2 { margin: 0 0 10px; font-size: 22px; }
+h3 { margin: 0; font-size: 17px; }
+p { line-height: 1.5; }
+.descricao { color: var(--texto-suave); margin: 0 0 20px; }
+.oculto { display: none !important; }
+.painel {
+    padding: 22px;
+    background: var(--painel);
+    border: 1px solid var(--borda);
+    border-radius: 18px;
+    margin-bottom: 16px;
+}
+.navegacao { margin-bottom: 14px; display: flex; gap: 10px; }
+.resumo {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 18px 0;
+}
+.resumo-item {
+    background: var(--painel-2);
+    border: 1px solid var(--borda);
+    padding: 15px;
+    border-radius: 14px;
+}
+.resumo-item strong { display: block; color: var(--verde); font-size: 25px; margin-bottom: 4px; }
+.resumo-item span { color: var(--texto-suave); font-size: 13px; }
+.grupo-botoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+button {
+    border: 0;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .15s ease, opacity .15s ease, background .15s ease;
+}
+button:hover { transform: translateY(-1px); }
+button:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 2px solid var(--verde); outline-offset: 3px;
+}
+.primario { background: var(--verde); color: #101820; }
+.secundario { background: var(--painel-2); color: var(--texto); border: 1px solid var(--borda); }
+.perigo { background: #482630; color: #ffdce0; border: 1px solid #74404a; }
+.largo { width: 100%; }
+.campo { margin: 18px 0; }
+label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 14px; }
+input, select {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    background: #121d27;
+    color: var(--texto);
+    padding: 13px 12px;
+    font: inherit;
+}
+.campo-ajuda { margin: 8px 0 0; color: var(--texto-suave); font-size: 12px; }
+.lista { display: grid; gap: 10px; margin-top: 14px; }
+.item-lista {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 15px;
+    background: var(--painel-2);
+    border: 1px solid var(--borda);
+    border-radius: 13px;
+}
+.item-lista p { color: var(--texto-suave); font-size: 13px; margin: 5px 0 0; }
+.item-lista .primario, .item-lista .secundario { flex-shrink: 0; }
+.pilula {
+    display: inline-block;
+    padding: 5px 8px;
+    border-radius: 999px;
+    background: #354454;
+    color: var(--texto-suave);
+    font-size: 11px;
+    margin-top: 7px;
+}
+.pilula.ligado { background: #174d40; color: #9ff6d8; }
+.estado { color: var(--texto-suave); text-align: center; margin: 12px 0 0; }
+.controles {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+.controles button {
+    flex: 0 1 auto;
+    min-width: 94px;
+    padding: 9px 14px;
+    font-size: 13px;
+    border-radius: 8px;
+}
+.ventilador {
+    width: 180px;
+    height: 180px;
+    margin: 20px auto;
+}
+.ventilador svg { width: 100%; height: 100%; overflow: visible; }
+#helice { transform-origin: 50px 50px; }
+#helice.girando { animation: girar 1s linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }
+
+/* Visual da lâmpada */
+.visual-lampada {
+    width: 150px;
+    height: 170px;
+    margin: 20px auto;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 0;
+    border-radius: 18px;
+    color: inherit;
+}
+.visual-lampada svg { width: 100%; height: 100%; overflow: visible; }
+.visual-lampada:focus-visible {
+    outline: 2px solid var(--verde);
+    outline-offset: 5px;
+}
+.visual-lampada:hover { transform: scale(1.03); }
+.visual-lampada:active { transform: scale(.98); }
+#luz-lampada {
+    fill: #354454;
+    stroke: #aebbc8;
+    transition: fill .3s ease, stroke .3s ease, filter .3s ease;
+}
+#luz-lampada.acessa {
+    fill: #ffe680;
+    stroke: #fff3b0;
+    filter: drop-shadow(0 0 12px #ffd54f);
+}
+#raios-lampada { opacity: 0; transition: opacity .3s ease; }
+#raios-lampada.acessos { opacity: 1; }
+#base-lampada { fill: #354454; stroke: #aebbc8; }
+.visual-tv {
+    width: min(330px, 100%);
+    margin: 24px auto;
+    border: 8px solid #354454;
+    border-radius: 12px;
+    background: #0b1117;
+    aspect-ratio: 16 / 9;
+    display: grid;
+    place-items: center;
+    color: var(--texto-suave);
+}
+.visual-tv.ligada { background: linear-gradient(135deg, #164a4b, #243e67); color: white; }
+.visual-tv span { font-weight: 700; }
+.vazio {
+    color: var(--texto-suave);
+    text-align: center;
+    border: 1px dashed var(--borda);
+    border-radius: 12px;
+    padding: 22px;
+}
+@media (max-width: 560px) {
+    .resumo { grid-template-columns: 1fr; }
+    .painel { padding: 17px; }
+    .item-lista { align-items: flex-start; flex-direction: column; }
+    .item-lista button { width: 100%; }
+    .controles { flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+</style>
+</head>
+<body>
+<header>
+    <div class="cabecalho">
+        <div class="logo">⌂</div>
+        <div>
+            <h1>Smart Home</h1>
+            <p>Controle demonstrativo da sua casa inteligente</p>
+        </div>
+    </div>
+</header>
+
+<main>
+    <!-- INÍCIO -->
+    <section id="tela-inicio">
+        <div class="painel">
+            <h2>Minha casa</h2>
+            <p class="descricao">Cadastre cômodos e organize seus dispositivos.</p>
+            <div class="resumo">
+                <div class="resumo-item"><strong id="total-comodos">0</strong><span>Cômodos</span></div>
+                <div class="resumo-item"><strong id="total-aparelhos">0</strong><span>Dispositivos</span></div>
+                <div class="resumo-item"><strong id="total-ligados">0</strong><span>Ligados</span></div>
+            </div>
+            <div class="grupo-botoes">
+                <button class="primario" id="abrir-form-comodo">+ Adicionar cômodo</button>
+                <button class="secundario" id="abrir-form-aparelho">+ Adicionar dispositivo</button>
+            </div>
+        </div>
+        <div class="painel">
+            <h2>Meus cômodos</h2>
+            <p class="descricao">Selecione um cômodo para ver seus dispositivos.</p>
+            <div id="lista-comodos" class="lista"></div>
+        </div>
+    </section>
+
+    <!-- CADASTRO DE CÔMODO -->
+    <section id="tela-form-comodo" class="oculto">
+        <div class="navegacao"><button class="secundario" data-voltar-inicio>← Início</button></div>
+        <div class="painel">
+            <h2>Adicionar cômodo</h2>
+            <p class="descricao">Escolha um cômodo ou informe um nome personalizado.</p>
+            <form id="form-comodo">
+                <div class="campo">
+                    <label for="tipo-comodo">Tipo de cômodo</label>
+                    <select id="tipo-comodo" required>
+                        <option value="">Selecione</option>
+                        <option value="Sala">Sala</option>
+                        <option value="Cozinha">Cozinha</option>
+                        <option value="Quarto">Quarto</option>
+                        <option value="Escritório">Escritório</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+                <div class="campo oculto" id="campo-outro-comodo">
+                    <label for="nome-outro-comodo">Nome do cômodo</label>
+                    <input id="nome-outro-comodo" type="text" maxlength="40" placeholder="Ex.: Lavanderia">
+                </div>
+                <div class="grupo-botoes">
+                    <button class="primario" type="submit">Salvar cômodo</button>
+                    <button class="secundario" type="button" data-voltar-inicio>Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- CADASTRO DE DISPOSITIVO -->
+    <section id="tela-form-aparelho" class="oculto">
+        <div class="navegacao"><button class="secundario" data-voltar-inicio>← Início</button></div>
+        <div class="painel">
+            <h2>Adicionar dispositivo</h2>
+            <p class="descricao">Cadastre o aparelho no cômodo desejado.</p>
+            <form id="form-aparelho">
+                <div class="campo">
+                    <label for="comodo-aparelho">Cômodo</label>
+                    <select id="comodo-aparelho" required></select>
+                </div>
+                <div class="campo">
+                    <label for="nome-aparelho">Nome do dispositivo</label>
+                    <input id="nome-aparelho" type="text" maxlength="50" placeholder="Ex.: Ventilador Arno" required>
+                </div>
+                <div class="campo">
+                    <label for="tipo-aparelho">Tipo de dispositivo</label>
+                    <select id="tipo-aparelho" required>
+                        <option value="ventilador">Ventilador</option>
+                        <option value="luz">Iluminação</option>
+                        <option value="tv">Televisão</option>
+                        <option value="sensor">Sensor de temperatura</option>
+                        <option value="outro">Outro dispositivo</option>
+                    </select>
+                    <p class="campo-ajuda">Os comandos desta versão são demonstrativos. O controle físico dependerá da integração com o hardware.</p>
+                </div>
+                <div class="grupo-botoes">
+                    <button class="primario" type="submit">Salvar dispositivo</button>
+                    <button class="secundario" type="button" data-voltar-inicio>Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- TELA DE UM CÔMODO -->
+    <section id="tela-comodo" class="oculto">
+        <div class="navegacao"><button class="secundario" id="voltar-da-lista">← Início</button></div>
+        <div class="painel">
+            <h2 id="titulo-comodo"></h2>
+            <p class="descricao">Dispositivos deste cômodo</p>
+            <button class="primario largo" id="adicionar-neste-comodo">+ Adicionar dispositivo aqui</button>
+            <div id="lista-aparelhos" class="lista"></div>
+            <button class="perigo largo" id="excluir-comodo" style="margin-top:20px">Excluir cômodo</button>
+        </div>
+    </section>
+
+    <!-- TELA DE CONTROLE DO DISPOSITIVO -->
+    <section id="tela-aparelho" class="oculto">
+        <div class="navegacao"><button class="secundario" id="voltar-do-aparelho">← Cômodo</button></div>
+        <div class="painel">
+            <h2 id="titulo-aparelho"></h2>
+            <p class="descricao" id="local-aparelho"></p>
+
+            <div id="visual-ventilador" class="ventilador oculto">
+                <svg viewBox="0 0 100 100" role="img" aria-label="Ventilador">
+                    <circle cx="50" cy="50" r="46" fill="#18232d" stroke="#43e0b1" stroke-width="2.5"/>
+                    <circle cx="50" cy="50" r="35" fill="none" stroke="#354454" stroke-width="1.5"/>
+                    <circle cx="50" cy="50" r="23" fill="none" stroke="#354454" stroke-width="1.5"/>
+                    <g id="helice" fill="#43e0b1">
+                        <path d="M50 44 C35 35 28 15 43 12 C57 10 59 32 53 44 Z"/>
+                        <path d="M56 50 C65 35 85 28 88 43 C90 57 68 59 56 53 Z"/>
+                        <path d="M50 56 C65 65 72 85 57 88 C43 90 41 68 47 56 Z"/>
+                        <path d="M44 50 C35 65 15 72 12 57 C10 43 32 41 44 47 Z"/>
+                        <circle cx="50" cy="50" r="7" fill="#101820" stroke="#43e0b1" stroke-width="2"/>
+                    </g>
+                </svg>
+            </div>
+
+            <button id="visual-lampada" class="visual-lampada oculto" type="button"
+                    aria-label="Ligar ou desligar lâmpada" aria-pressed="false"
+                    title="Clique para ligar ou desligar">
+                <svg viewBox="0 0 100 120" role="img" aria-label="Lâmpada">
+                    <g id="raios-lampada" stroke="#ffd54f" stroke-width="3" stroke-linecap="round">
+                        <path d="M50 5 V14"/>
+                        <path d="M20 18 L27 25"/>
+                        <path d="M80 18 L73 25"/>
+                        <path d="M10 48 H19"/>
+                        <path d="M81 48 H90"/>
+                    </g>
+                    <path id="luz-lampada" d="M50 17 C31 17 20 31 20 47 C20 59 28 66 34 75 L37 84 H63 L66 75 C72 66 80 59 80 47 C80 31 69 17 50 17 Z" stroke-width="2.5" stroke-linejoin="round"/>
+                    <g id="base-lampada" stroke-width="2">
+                        <path d="M37 87 H63 V94 H37 Z"/>
+                        <path d="M39 98 H61 V103 H39 Z"/>
+                        <path d="M43 107 H57 Q57 112 50 112 Q43 112 43 107 Z"/>
+                    </g>
+                </svg>
+            </button>
+
+            <div id="visual-tv" class="visual-tv oculto"><span id="texto-tv">TV desligada</span></div>
+            <div id="visual-generico" class="vazio oculto">Este dispositivo não possui uma representação visual específica.</div>
+
+            <p id="status-aparelho" class="estado">Desligado</p>
+            <div class="controles" style="margin-top:18px">
+                <button class="primario" id="botao-ligar">Ligar</button>
+                <button class="secundario" id="botao-desligar">Desligar</button>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+const CHAVE = "smartHomeCadastroV1";
+let dados = carregarDados();
+let comodoAtualId = null;
+let aparelhoAtualId = null;
+let comodoDestinoAparelho = null;
+
+function carregarDados() {
+    try {
+        const salvo = JSON.parse(localStorage.getItem(CHAVE));
+        if (salvo && Array.isArray(salvo.comodos) && Array.isArray(salvo.aparelhos)) return salvo;
+    } catch (erro) { console.warn("Não foi possível carregar os dados salvos.", erro); }
+    return { comodos: [], aparelhos: [] };
+}
+function salvarDados() {
+    localStorage.setItem(CHAVE, JSON.stringify(dados));
+}
+function idNovo() {
+    return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2);
+}
+function escapar(texto) {
+    return String(texto).replace(/[&<>"']/g, caractere => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[caractere]);
+}
+function mostrarTela(id) {
+    document.querySelectorAll("main > section").forEach(secao => secao.classList.add("oculto"));
+    document.getElementById(id).classList.remove("oculto");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function buscarComodo(id) { return dados.comodos.find(comodo => comodo.id === id); }
+function buscarAparelho(id) { return dados.aparelhos.find(aparelho => aparelho.id === id); }
+function nomeTipo(tipo) {
+    return ({ ventilador: "Ventilador", luz: "Iluminação", tv: "Televisão", sensor: "Sensor de temperatura", outro: "Outro dispositivo" })[tipo] || "Dispositivo";
+}
+function atualizarInicio() {
+    document.getElementById("total-comodos").textContent = dados.comodos.length;
+    document.getElementById("total-aparelhos").textContent = dados.aparelhos.length;
+    document.getElementById("total-ligados").textContent = dados.aparelhos.filter(a => a.ligado).length;
+
+    const lista = document.getElementById("lista-comodos");
+    if (!dados.comodos.length) {
+        lista.innerHTML = '<div class="vazio">Você ainda não cadastrou cômodos.</div>';
+    } else {
+        lista.innerHTML = dados.comodos.map(comodo => {
+            const quantidade = dados.aparelhos.filter(a => a.comodoId === comodo.id).length;
+            return `<div class="item-lista">
+                <div><h3>${escapar(comodo.nome)}</h3><p>${quantidade} dispositivo(s)</p></div>
+                <button class="primario" data-abrir-comodo="${escapar(comodo.id)}">Abrir cômodo</button>
+            </div>`;
+        }).join("");
+    }
+    atualizarSelectComodos();
+}
+function atualizarSelectComodos() {
+    const select = document.getElementById("comodo-aparelho");
+    const anterior = select.value;
+    select.innerHTML = dados.comodos.map(c => `<option value="${escapar(c.id)}">${escapar(c.nome)}</option>`).join("");
+    if (!dados.comodos.length) {
+        select.innerHTML = '<option value="">Cadastre um cômodo primeiro</option>';
+    } else if (comodoDestinoAparelho && buscarComodo(comodoDestinoAparelho)) {
+        select.value = comodoDestinoAparelho;
+    } else if (buscarComodo(anterior)) {
+        select.value = anterior;
+    }
+}
+function abrirCadastroComodo() {
+    document.getElementById("form-comodo").reset();
+    document.getElementById("campo-outro-comodo").classList.add("oculto");
+    document.getElementById("nome-outro-comodo").required = false;
+    mostrarTela("tela-form-comodo");
+}
+function abrirCadastroAparelho(comodoId = null) {
+    if (!dados.comodos.length) {
+        alert("Cadastre um cômodo antes de adicionar um dispositivo.");
+        abrirCadastroComodo();
+        return;
+    }
+    comodoDestinoAparelho = comodoId;
+    document.getElementById("form-aparelho").reset();
+    atualizarSelectComodos();
+    mostrarTela("tela-form-aparelho");
+}
+function abrirComodo(id) {
+    const comodo = buscarComodo(id);
+    if (!comodo) return;
+    comodoAtualId = id;
+    document.getElementById("titulo-comodo").textContent = comodo.nome;
+    const aparelhos = dados.aparelhos.filter(a => a.comodoId === id);
+    const lista = document.getElementById("lista-aparelhos");
+    if (!aparelhos.length) {
+        lista.innerHTML = '<div class="vazio">Este cômodo ainda não tem dispositivos.</div>';
+    } else {
+        lista.innerHTML = aparelhos.map(a => `
+            <div class="item-lista">
+                <div>
+                    <h3>${escapar(a.nome)}</h3>
+                    <p>${escapar(nomeTipo(a.tipo))}</p>
+                    <span class="pilula ${a.ligado ? "ligado" : ""}">${a.ligado ? "Ligado" : "Desligado"}</span>
+                </div>
+                <button class="primario" data-abrir-aparelho="${escapar(a.id)}">Controlar</button>
+            </div>`).join("");
+    }
+    mostrarTela("tela-comodo");
+}
+function abrirAparelho(id) {
+    const aparelho = buscarAparelho(id);
+    if (!aparelho) return;
+    aparelhoAtualId = id;
+    document.getElementById("titulo-aparelho").textContent = aparelho.nome;
+    const comodo = buscarComodo(aparelho.comodoId);
+    document.getElementById("local-aparelho").textContent = comodo ? comodo.nome : "Cômodo não encontrado";
+
+    const eVentilador = aparelho.tipo === "ventilador";
+    const eLampada = aparelho.tipo === "luz";
+    const eTV = aparelho.tipo === "tv";
+    document.getElementById("visual-ventilador").classList.toggle("oculto", !eVentilador);
+    document.getElementById("visual-lampada").classList.toggle("oculto", !eLampada);
+    document.getElementById("visual-tv").classList.toggle("oculto", !eTV);
+    document.getElementById("visual-generico").classList.toggle("oculto", eVentilador || eLampada || eTV);
+    atualizarEstadoVisual();
+    mostrarTela("tela-aparelho");
+}
+function alterarEstado(ligado) {
+    const aparelho = buscarAparelho(aparelhoAtualId);
+    if (!aparelho) return;
+    aparelho.ligado = ligado;
+    salvarDados();
+    atualizarEstadoVisual();
+    atualizarInicio();
+}
+function atualizarEstadoVisual() {
+    const aparelho = buscarAparelho(aparelhoAtualId);
+    if (!aparelho) return;
+
+    document.getElementById("status-aparelho").textContent = aparelho.ligado ? "Ligado" : "Desligado";
+
+    const helice = document.getElementById("helice");
+    if (helice) helice.classList.toggle("girando", aparelho.ligado && aparelho.tipo === "ventilador");
+
+    const lampada = document.getElementById("luz-lampada");
+    const raios = document.getElementById("raios-lampada");
+    if (lampada) lampada.classList.toggle("acessa", aparelho.ligado && aparelho.tipo === "luz");
+    if (raios) raios.classList.toggle("acessos", aparelho.ligado && aparelho.tipo === "luz");
+    const botaoLampada = document.getElementById("visual-lampada");
+    botaoLampada.setAttribute("aria-pressed", String(aparelho.ligado && aparelho.tipo === "luz"));
+    botaoLampada.setAttribute(
+        "aria-label",
+        aparelho.ligado ? "Desligar lâmpada" : "Ligar lâmpada"
+    );
+
+    const tv = document.getElementById("visual-tv");
+    tv.classList.toggle("ligada", aparelho.ligado && aparelho.tipo === "tv");
+    document.getElementById("texto-tv").textContent = aparelho.ligado ? "TV ligada" : "TV desligada";
+
+    document.getElementById("botao-ligar").disabled = aparelho.ligado;
+    document.getElementById("botao-desligar").disabled = !aparelho.ligado;
+    document.getElementById("botao-ligar").style.opacity = aparelho.ligado ? ".55" : "1";
+    document.getElementById("botao-desligar").style.opacity = aparelho.ligado ? "1" : ".55";
+}
+document.getElementById("abrir-form-comodo").addEventListener("click", abrirCadastroComodo);
+document.getElementById("abrir-form-aparelho").addEventListener("click", () => abrirCadastroAparelho());
+document.querySelectorAll("[data-voltar-inicio]").forEach(botao => botao.addEventListener("click", () => {
+    comodoDestinoAparelho = null;
+    atualizarInicio();
+    mostrarTela("tela-inicio");
+}));
+document.getElementById("tipo-comodo").addEventListener("change", evento => {
+    const outro = evento.target.value === "Outro";
+    document.getElementById("campo-outro-comodo").classList.toggle("oculto", !outro);
+    document.getElementById("nome-outro-comodo").required = outro;
+});
+document.getElementById("form-comodo").addEventListener("submit", evento => {
+    evento.preventDefault();
+    const tipo = document.getElementById("tipo-comodo").value;
+    const nome = tipo === "Outro" ? document.getElementById("nome-outro-comodo").value.trim() : tipo;
+    if (!nome) return;
+    if (dados.comodos.some(c => c.nome.toLocaleLowerCase("pt-BR") === nome.toLocaleLowerCase("pt-BR"))) {
+        alert("Já existe um cômodo com esse nome.");
+        return;
+    }
+    const comodo = { id: idNovo(), nome };
+    dados.comodos.push(comodo);
+    salvarDados();
+    atualizarInicio();
+    mostrarTela("tela-inicio");
+});
+document.getElementById("form-aparelho").addEventListener("submit", evento => {
+    evento.preventDefault();
+    const comodoId = document.getElementById("comodo-aparelho").value;
+    const nome = document.getElementById("nome-aparelho").value.trim();
+    const tipo = document.getElementById("tipo-aparelho").value;
+    if (!buscarComodo(comodoId)) {
+        alert("Selecione um cômodo válido.");
+        return;
+    }
+    if (!nome) return;
+    dados.aparelhos.push({ id: idNovo(), comodoId, nome, tipo, ligado: false });
+    salvarDados();
+    comodoDestinoAparelho = null;
+    atualizarInicio();
+    abrirComodo(comodoId);
+});
+document.getElementById("lista-comodos").addEventListener("click", evento => {
+    const botao = evento.target.closest("[data-abrir-comodo]");
+    if (botao) abrirComodo(botao.dataset.abrirComodo);
+});
+document.getElementById("lista-aparelhos").addEventListener("click", evento => {
+    const botao = evento.target.closest("[data-abrir-aparelho]");
+    if (botao) abrirAparelho(botao.dataset.abrirAparelho);
+});
+document.getElementById("voltar-da-lista").addEventListener("click", () => {
+    atualizarInicio();
+    mostrarTela("tela-inicio");
+});
+document.getElementById("adicionar-neste-comodo").addEventListener("click", () => abrirCadastroAparelho(comodoAtualId));
+document.getElementById("excluir-comodo").addEventListener("click", () => {
+    const comodo = buscarComodo(comodoAtualId);
+    if (!comodo) return;
+    if (!confirm(`Excluir o cômodo "${comodo.nome}" e todos os seus dispositivos?`)) return;
+    dados.aparelhos = dados.aparelhos.filter(a => a.comodoId !== comodoAtualId);
+    dados.comodos = dados.comodos.filter(c => c.id !== comodoAtualId);
+    comodoAtualId = null;
+    salvarDados();
+    atualizarInicio();
+    mostrarTela("tela-inicio");
+});
+document.getElementById("voltar-do-aparelho").addEventListener("click", () => abrirComodo(comodoAtualId));
+document.getElementById("botao-ligar").addEventListener("click", () => alterarEstado(true));
+document.getElementById("botao-desligar").addEventListener("click", () => alterarEstado(false));
+document.getElementById("visual-lampada").addEventListener("click", () => {
+    const aparelho = buscarAparelho(aparelhoAtualId);
+    if (aparelho && aparelho.tipo === "luz") alterarEstado(!aparelho.ligado);
+});
+
+atualizarInicio();
+</script>
+</body>
+</html>
